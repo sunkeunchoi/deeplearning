@@ -1,5 +1,6 @@
 #FROM nvidia/cuda:8.0-cudnn5-devel
-FROM tensorflow/tensorflow:latest-devel-gpu-py3
+#FROM tensorflow/tensorflow:latest-devel-gpu-py3
+FROM tensorflow/tesnorflow:latest-gpu-py3
 
 ENV \
   TENSORFLOW_VERSION=1.0
@@ -36,15 +37,15 @@ RUN curl -fSsL -O https://bootstrap.pypa.io/get-pip.py && \
     python get-pip.py && \
     rm get-pip.py
 
-RUN pip --no-cache-dir install \
-        ipykernel \
-        jupyter \
-        matplotlib \
-        numpy \
-        scipy \
-        sklearn \
-        && \
-    python -m ipykernel.kernelspec
+#RUN pip --no-cache-dir install \
+#        ipykernel \
+#        jupyter \
+#        matplotlib \
+#        numpy \
+#        scipy \
+#        sklearn \
+#        && \
+#    python -m ipykernel.kernelspec
 
 # Jupyter has issues with being run directly:
 #   https://github.com/ipython/ipython/issues/7062
@@ -62,11 +63,11 @@ COPY jupyter_notebook_config.py /root/.jupyter/
 # we either update the base image beyond 14.04 or openjdk-8 is
 # finally backported to trusty; see e.g.
 #   https://bugs.launchpad.net/trusty-backports/+bug/1368094
-RUN add-apt-repository -y ppa:openjdk-r/ppa && \
-    apt-get update && \
-    apt-get install -y --no-install-recommends openjdk-8-jdk openjdk-8-jre-headless && \
-    apt-get clean && \
-    rm -rf /var/lib/apt/lists/*
+#RUN add-apt-repository -y ppa:openjdk-r/ppa && \
+#    apt-get update && \
+#    apt-get install -y --no-install-recommends openjdk-8-jdk openjdk-8-jre-headless && \
+#    apt-get clean && \
+#    rm -rf /var/lib/apt/lists/*
 
 # Set up Bazel.
 
@@ -93,11 +94,11 @@ RUN add-apt-repository -y ppa:openjdk-r/ppa && \
 
 # Download and build TensorFlow.
 
-RUN git clone -b r$TENSORFLOW_VERSION --recursive --recurse-submodules https://github.com/tensorflow/tensorflow.git && \
-    cd tensorflow && \
-    git checkout r$TENSORFLOW_VERSION
-
-WORKDIR /tensorflow
+#RUN git clone -b r$TENSORFLOW_VERSION --recursive --recurse-submodules https://github.com/tensorflow/tensorflow.git && \
+#    cd tensorflow && \
+#    git checkout r$TENSORFLOW_VERSION
+#
+#WORKDIR /tensorflow
 
 # Configure the build for our CUDA configuration.
 ENV CI_BUILD_PYTHON python
@@ -133,13 +134,13 @@ ENV TF_NEED_CUDA 1
 #ENV TF_CUDA_COMPUTE_CAPABILITIES=3.0,3.5,3.7,5.2
 ENV TF_CUDA_COMPUTE_CAPABILITIES=3.7,5.2
 
-RUN tensorflow/tools/ci_build/builds/configured GPU \
-    bazel build -c opt --config=cuda tensorflow/tools/pip_package:build_pip_package && \
-    bazel-bin/tensorflow/tools/pip_package/build_pip_package /tmp/pip && \
-    pip --no-cache-dir install --upgrade /tmp/pip/tensorflow-*.whl && \
-    rm -rf /tmp/pip && \
-    rm -rf /root/.cache
-# Clean up pip wheel and Bazel cache when done.
+#RUN tensorflow/tools/ci_build/builds/configured GPU \
+#    bazel build -c opt --config=cuda tensorflow/tools/pip_package:build_pip_package && \
+#    bazel-bin/tensorflow/tools/pip_package/build_pip_package /tmp/pip && \
+#    pip --no-cache-dir install --upgrade /tmp/pip/tensorflow-*.whl && \
+#    rm -rf /tmp/pip && \
+#    rm -rf /root/.cache
+## Clean up pip wheel and Bazel cache when done.
 
 WORKDIR /root
 
