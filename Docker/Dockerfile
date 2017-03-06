@@ -1,7 +1,8 @@
 #FROM ubuntu:16.04
 #FROM blitznote/debootstrap-amd64:16.10
-FROM phusion/baseimage:latest
+#FROM phusion/baseimage:latest
 # Pick up some TF dependencies
+FROM base_common
 RUN apt-get update && apt-get install -y --no-install-recommends \
         build-essential \
         curl \
