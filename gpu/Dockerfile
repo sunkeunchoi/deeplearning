@@ -27,6 +27,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         python3-dev \
         python3-wheel \
         python3-mock \
+        libclang-dev \
         && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
@@ -49,7 +50,9 @@ RUN pip --no-cache-dir install \
         boto3 \
         && \
     python -m ipykernel.kernelspec
-
+RUN pip --no-chace-dir install --upgrade \
+  https://storage.googleapis.com/tensorflow/linux/cpu/protobuf-3.1.0-cp35-none-linux_x86_64.whl
+  
 # Set up our notebook config.
 COPY jupyter_notebook_config.py /root/.jupyter/
 # Jupyter has issues with being run directly:
@@ -105,6 +108,20 @@ ENV CI_BUILD_PYTHON python
 ENV LD_LIBRARY_PATH /usr/local/cuda/extras/CUPTI/lib64:$LD_LIBRARY_PATH
 ENV TF_NEED_CUDA 1
 ENV TF_CUDA_COMPUTE_CAPABILITIES=3.5,3.7,5.2,6.0,6.1
+#
+ENV TF_NEED_MKL 1
+ENV CC_OPT_FLAGS -march=native
+ENV TF_NEED_GCP 0
+ENV TF_NEED_HDFS 0
+ENV TF_NEED_JEMALLOC 1
+ENV TF_NEED_OPENCL 0
+ENV TF_ENABLE_XLA 0
+#ENV TF_CUDA_VERSION
+#ENV CUDA_TOOLKIT_PATH
+#ENV TF_CUDNN_VERSION
+#ENV CUDNN_INSTALL_PATH
+#ENV HOST_CXX_COMPILER
+#ENV HOST_C_COMPILER
 #RUN configure
 #RUN tensorflow/tools/ci_build/builds/configured GPU \
 #    bazel build -c opt --config=cuda tensorflow/tools/pip_package:build_pip_package && \
