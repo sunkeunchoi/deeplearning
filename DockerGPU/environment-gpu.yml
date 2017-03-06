@@ -16,5 +16,5 @@ dependencies:
     - tqdm
     - pip:
         - tensorflow
-	- TFLearn
+        - TFLearn
         - git+https://github.com/fchollet/keras.git
