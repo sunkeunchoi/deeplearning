@@ -25,6 +25,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
+RUN rm -f /usr/bin/python
+RUN ln -s /usr/bin/python3 /usr/bin/python
+
 RUN curl -fSsL -O https://bootstrap.pypa.io/get-pip.py && \
     python get-pip.py && \
     rm get-pip.py
@@ -43,7 +46,6 @@ RUN pip --no-cache-dir install \
 
 # Set up our notebook config.
 COPY jupyter_notebook_config.py /root/.jupyter/
-
 # Jupyter has issues with being run directly:
 #   https://github.com/ipython/ipython/issues/7062
 # We just add a little wrapper script.
@@ -92,11 +94,12 @@ RUN git clone https://github.com/tensorflow/tensorflow.git && \
 WORKDIR /tensorflow
 
 # Configure the build for our CUDA configuration.
+ENV CUDA_HOME /usr/local/cuda
 ENV CI_BUILD_PYTHON python
 ENV LD_LIBRARY_PATH /usr/local/cuda/extras/CUPTI/lib64:$LD_LIBRARY_PATH
 ENV TF_NEED_CUDA 1
 ENV TF_CUDA_COMPUTE_CAPABILITIES=3.5,3.7,5.2,6.0,6.1
-#RUN tensorflow/configure
+RUN configure
 #RUN tensorflow/tools/ci_build/builds/configured GPU \
 #    bazel build -c opt --config=cuda tensorflow/tools/pip_package:build_pip_package && \
 #    bazel-bin/tensorflow/tools/pip_package/build_pip_package /tmp/pip && \
