@@ -50,7 +50,7 @@ RUN pip --no-cache-dir install \
         boto3 \
         && \
     python -m ipykernel.kernelspec
-RUN pip --no-chace-dir install --upgrade \
+RUN pip --no-cache-dir install --upgrade\
   https://storage.googleapis.com/tensorflow/linux/cpu/protobuf-3.1.0-cp35-none-linux_x86_64.whl
   
 # Set up our notebook config.
