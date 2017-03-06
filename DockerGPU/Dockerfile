@@ -1,5 +1,5 @@
-FROM nvidia/cuda:8.0-cudnn5-runtime-ubuntu16.04
-#FROM gcr.io/tensorflow/tensorflow:latest-gpu
+#FROM nvidia/cuda:8.0-cudnn5-runtime-ubuntu16.04
+FROM gcr.io/tensorflow/tensorflow:latest-gpu
 
 # Pick up some TF dependencies
 RUN apt-get update && apt-get install -y --no-install-recommends \
