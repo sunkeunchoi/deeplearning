@@ -1,12 +1,16 @@
 #FROM nvidia/cuda:8.0-cudnn5-devel
-#FROM tensorflow/tensorflow:latest-devel-gpu-py3
-FROM fluxcapacitor/gpu-tensorflow:latest
+FROM tensorflow/tensorflow:latest-devel-gpu-py3
 
-# prevent shell interactions
-ENV DEBIAN_FRONTEND noninteractive
-ENV DEBCONF_NONINTERACTIVE_SEEN true
+ENV \
+  TENSORFLOW_VERSION=1.0
+  
+# Adapted from 
+#   https://github.com/tensorflow/tensorflow/blob/master/tensorflow/tools/docker/Dockerfile.devel-gpu
 
-# prepare for pip3
+# TODO: Add the Nvidia CUDA Profile Tools Interface
+#RUN \
+#  sudo apt-get install libcupti-dev
+
 RUN apt-get update && apt-get install -y --no-install-recommends \
         build-essential \
         curl \
@@ -22,40 +26,118 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         unzip \
         zip \
         zlib1g-dev \
-        git \
-        vim \
         && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
-
+    
 RUN ln -s /usr/bin/python3 /usr/bin/python
 
-# Install basic requirments
-RUN pip --no-cache-dir install \
-        requests \
-        Pillow \
-        pydash \
-        scipy \
-        falcon \
-        gunicorn \
-        matplotlib \
-        scikit-learn \
-        PyYAML \
-        psutil \
-        pandas \
-        gensim \
-        openpyxl \
-        boto3 \
-        h5py \
-        keras \
-        beautifulsoup4
-# setup missing locale
-RUN locale-gen en_US.UTF-8
-ENV LC_ALL=en_US.UTF-8
-ENV LANG=en_US.UTF-8
-ENV LANGUAGE=en_US.UTF-8
+RUN curl -fSsL -O https://bootstrap.pypa.io/get-pip.py && \
+    python get-pip.py && \
+    rm get-pip.py
 
-ENV KERAS_BACKEND=tensorflow
+RUN pip --no-cache-dir install \
+        ipykernel \
+        jupyter \
+        matplotlib \
+        numpy \
+        scipy \
+        sklearn \
+        && \
+    python -m ipykernel.kernelspec
+
+# Jupyter has issues with being run directly:
+#   https://github.com/ipython/ipython/issues/7062
+# We just add a little wrapper script.
+COPY run_jupyter.sh /
+
+# Setup Java (used by Bazel)
+
+# We need to add a custom PPA to pick up JDK8, since trusty doesn't
+# have an openjdk8 backport.  openjdk-r is maintained by a reliable contributor:
+# Matthias Klose (https://launchpad.net/~doko).  It will do until
+# we either update the base image beyond 14.04 or openjdk-8 is
+# finally backported to trusty; see e.g.
+#   https://bugs.launchpad.net/trusty-backports/+bug/1368094
+RUN add-apt-repository -y ppa:openjdk-r/ppa && \
+    apt-get update && \
+    apt-get install -y --no-install-recommends openjdk-8-jdk openjdk-8-jre-headless && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
+
+# Set up Bazel.
+
+# Running bazel inside a `docker build` command causes trouble, cf:
+#   https://github.com/bazelbuild/bazel/issues/134
+# The easiest solution is to set up a bazelrc file forcing --batch.
+RUN echo "startup --batch" >>/root/.bazelrc
+# Similarly, we need to workaround sandboxing issues:
+#   https://github.com/bazelbuild/bazel/issues/418
+RUN echo "build --spawn_strategy=standalone --genrule_strategy=standalone" \
+    >>/root/.bazelrc
+ENV BAZELRC /root/.bazelrc
+# Install the most recent bazel release.
+ENV BAZEL_VERSION 0.4.4
+WORKDIR /
+RUN mkdir /bazel && \
+    cd /bazel && \
+    curl -fSsL -O https://github.com/bazelbuild/bazel/releases/download/$BAZEL_VERSION/bazel-$BAZEL_VERSION-installer-linux-x86_64.sh && \
+    curl -fSsL -o /bazel/LICENSE.txt https://raw.githubusercontent.com/bazelbuild/bazel/master/LICENSE.txt && \
+    chmod +x bazel-*.sh && \
+    ./bazel-$BAZEL_VERSION-installer-linux-x86_64.sh && \
+    cd / && \
+    rm -f /bazel/bazel-$BAZEL_VERSION-installer-linux-x86_64.sh
+
+# Download and build TensorFlow.
+
+RUN git clone -b r$TENSORFLOW_VERSION --recursive --recurse-submodules https://github.com/tensorflow/tensorflow.git && \
+    cd tensorflow && \
+    git checkout r$TENSORFLOW_VERSION
+
+WORKDIR /tensorflow
+
+# Configure the build for our CUDA configuration.
+ENV CI_BUILD_PYTHON python
+ENV LD_LIBRARY_PATH /usr/local/cuda/extras/CUPTI/lib64:$LD_LIBRARY_PATH
+ENV TF_NEED_CUDA 1
+
+# Check the required COMPUTE_CAPABILITIES from the following link:
+#  https://developer.nvidia.com/cuda-gpus
+# Also, Tensorflow has a minimum-supported COMPUTE CAPABILITY (ie. 3.5)
+# ie. here are the AWS EC2 Instance Types and their COMPUTE CAPABILITIES
+#
+## AWS P2 Instances (3.7)
+# Product Type  Tesla
+# Product Series  K-Series
+# Product  K-80
+# Operating System  Linux 64-bit
+# Recommended/Beta  Recommended/Certified
+#
+## G2 Instances (3.5)
+# Product Type  GRID
+# Product Series  GRID Series
+# Product  GRID K520
+# Operating System  Linux 64-bit
+# Recommended/Beta  Recommended/Certified
+#
+## CG1 Instances (3.0)
+# Product Type  Tesla
+# Product Series  M-Class
+# Product  M2050
+# Operating System  Linux 64-bit
+# Recommended/Beta  Recommended/Certified
+#
+ENV TF_CUDA_COMPUTE_CAPABILITIES=3.0,3.5,3.7,5.2
+
+RUN tensorflow/tools/ci_build/builds/configured GPU \
+    bazel build -c opt --config=cuda tensorflow/tools/pip_package:build_pip_package && \
+    bazel-bin/tensorflow/tools/pip_package/build_pip_package /tmp/pip && \
+    pip --no-cache-dir install --upgrade /tmp/pip/tensorflow-*.whl && \
+    rm -rf /tmp/pip && \
+    rm -rf /root/.cache
+# Clean up pip wheel and Bazel cache when done.
+
+WORKDIR /root
 
 ADD https://repo.continuum.io/miniconda/Miniconda3-4.2.12-Linux-x86_64.sh tmp/Miniconda3-4.2.12-Linux-x86_64.sh
 RUN bash tmp/Miniconda3-4.2.12-Linux-x86_64.sh -b
@@ -83,7 +165,7 @@ EXPOSE 6006
 # Jupyter
 EXPOSE 8888
 # Flask Server
-EXPOSE 4567
+#EXPOSE 4567
 
 ## Two Birds, One Stone
 # 1. sources conda environment
