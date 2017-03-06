@@ -15,6 +15,6 @@ dependencies:
     - pandas
     - tqdm
     - pip:
-        - tensorflow
-	- TFLearn
+        - TFLearn
+        - https://storage.googleapis.com/tensorflow/linux/gpu/tensorflow_gpu-1.0.0-cp35-cp35m-linux_x86_64.whl
         - git+https://github.com/fchollet/keras.git
