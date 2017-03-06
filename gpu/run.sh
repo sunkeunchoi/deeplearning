@@ -1,6 +1,6 @@
 #!/bin/bash
 set -e
-. activate tf
+#. activate tf
 
 if [ -z "$1" ]
   then

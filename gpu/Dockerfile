@@ -43,7 +43,7 @@ COPY jupyter_notebook_config.py /root/.jupyter/
 # Jupyter has issues with being run directly:
 #   https://github.com/ipython/ipython/issues/7062
 # We just add a little wrapper script.
-COPY run_jupyter.sh /
+#COPY run_jupyter.sh /
 
 # Set up Bazel.
 
@@ -107,5 +107,18 @@ RUN tensorflow/configure
 #EXPOSE 6006
 ## IPython
 #EXPOSE 8888
+#RUN ["/bin/bash"]
 
-RUN ["/bin/bash"]
+# TensorBoard
+EXPOSE 6006
+# Jupyter
+EXPOSE 8888
+# Flask Server
+#EXPOSE 4567
+
+## Two Birds, One Stone
+# 1. sources conda environment
+# 2. prevents the zombie container issue when started as pid 1
+COPY run.sh /
+RUN chmod +x /run.sh
+ENTRYPOINT ["/run.sh"]
