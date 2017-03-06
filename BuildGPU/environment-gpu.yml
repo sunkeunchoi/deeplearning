@@ -1,4 +1,4 @@
-name: carnd-term1
+name: tensorflow
 channels:
     - https://conda.anaconda.org/menpo
     - conda-forge
@@ -15,6 +15,5 @@ dependencies:
     - pandas
     - tqdm
     - pip:
-        - tensorflow
         - TFLearn
         - git+https://github.com/fchollet/keras.git
