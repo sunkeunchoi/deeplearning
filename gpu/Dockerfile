@@ -18,12 +18,15 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         libpng12-dev \
         libzmq3-dev \
         pkg-config \
-        python-dev \
         rsync \
         software-properties-common \
         unzip \
         zip \
         zlib1g-dev \
+        python3-numpy \
+        python3-dev \
+        python3-wheel \
+        python3-mock \
         && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
