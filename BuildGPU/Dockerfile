@@ -1,6 +1,6 @@
 #FROM nvidia/cuda:8.0-cudnn5-devel
 #FROM tensorflow/tensorflow:latest-devel-gpu-py3
-FROM tensorflow/tesnorflow:latest-gpu-py3
+FROM tensorflow/tensorflow:latest-gpu-py3
 
 ENV \
   TENSORFLOW_VERSION=1.0
