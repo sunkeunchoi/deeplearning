@@ -49,7 +49,10 @@ RUN pip --no-cache-dir install \
 # Jupyter has issues with being run directly:
 #   https://github.com/ipython/ipython/issues/7062
 # We just add a little wrapper script.
-COPY run_jupyter.sh /
+#COPY run_jupyter.sh /
+
+# Set up our notebook config.
+COPY jupyter_notebook_config.py /root/.jupyter/
 
 # Setup Java (used by Bazel)
 
@@ -150,7 +153,7 @@ RUN conda env create -f=environment.yml --name tensorflow --debug -v -v
 RUN conda clean -tp -y
 
 # Set up our notebook config.
-COPY jupyter_notebook_config.py /root/.jupyter/
+#COPY jupyter_notebook_config.py /root/.jupyter/
 
 # Term 1 workdir
 RUN mkdir /src
