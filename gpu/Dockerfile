@@ -3,11 +3,11 @@ FROM nvidia/cuda:8.0-cudnn5-devel-ubuntu16.04
 #MAINTAINER Craig Citro <craigcitro@google.com>
 
 # TODO: Add the Nvidia CUDA Profile Tools Interface
-RUN apt-get update && \
-        apt-get install libcupti-dev \
-        && \
-    apt-get clean && \
-    rm -rf /var/lib/apt/lists/*
+#RUN apt-get update && \
+#        apt-get install libcupti-dev \
+#        && \
+#    apt-get clean && \
+#    rm -rf /var/lib/apt/lists/*
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
         build-essential \
