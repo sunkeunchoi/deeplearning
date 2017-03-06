@@ -149,7 +149,7 @@ RUN bash tmp/Miniconda3-4.2.12-Linux-x86_64.sh -b
 ENV PATH $PATH:/root/miniconda3/bin/
 
 COPY environment-gpu.yml  ./environment.yml
-RUN conda env create -f=environment.yml --name tensorflow --debug -v -v
+RUN conda env create -f=environment.yml --name tf --debug -v -v
 
 # cleanup tarballs and downloaded package files
 RUN conda clean -tp -y
