@@ -163,7 +163,7 @@ WORKDIR "/src"
 
 # Make sure CUDNN is detected
 ENV LD_LIBRARY_PATH /usr/local/cuda/lib64/:$LD_LIBRARY_PATH
-RUN ln -s /usr/local/cuda/lib64/libcudnn.so.5 /usr/local/cuda/lib64/libcudnn.so
+#RUN ln -s /usr/local/cuda/lib64/libcudnn.so.5 /usr/local/cuda/lib64/libcudnn.so
 
 # TensorBoard
 EXPOSE 6006
