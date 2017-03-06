@@ -2,6 +2,10 @@ FROM nvidia/cuda:8.0-cudnn5-devel-ubuntu16.04
 
 #MAINTAINER Craig Citro <craigcitro@google.com>
 
+# TODO: Add the Nvidia CUDA Profile Tools Interface
+#RUN apt-get update && \
+#        sudo apt-get install libcupti-dev
+
 RUN apt-get update && apt-get install -y --no-install-recommends \
         build-essential \
         curl \
@@ -92,7 +96,7 @@ ENV CI_BUILD_PYTHON python
 ENV LD_LIBRARY_PATH /usr/local/cuda/extras/CUPTI/lib64:$LD_LIBRARY_PATH
 ENV TF_NEED_CUDA 1
 ENV TF_CUDA_COMPUTE_CAPABILITIES=3.5,3.7,5.2,6.0,6.1
-RUN tensorflow/configure
+#RUN tensorflow/configure
 #RUN tensorflow/tools/ci_build/builds/configured GPU \
 #    bazel build -c opt --config=cuda tensorflow/tools/pip_package:build_pip_package && \
 #    bazel-bin/tensorflow/tools/pip_package/build_pip_package /tmp/pip && \
