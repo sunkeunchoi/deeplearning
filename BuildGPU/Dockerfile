@@ -130,7 +130,8 @@ ENV TF_NEED_CUDA 1
 # Operating System  Linux 64-bit
 # Recommended/Beta  Recommended/Certified
 #
-ENV TF_CUDA_COMPUTE_CAPABILITIES=3.0,3.5,3.7,5.2
+#ENV TF_CUDA_COMPUTE_CAPABILITIES=3.0,3.5,3.7,5.2
+ENV TF_CUDA_COMPUTE_CAPABILITIES=3.7,5.2
 
 RUN tensorflow/tools/ci_build/builds/configured GPU \
     bazel build -c opt --config=cuda tensorflow/tools/pip_package:build_pip_package && \
