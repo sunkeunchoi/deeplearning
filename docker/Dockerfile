@@ -15,16 +15,12 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         unzip \
         zip \
         zlib1g-dev \
-        python3-numpy \
         python3-dev \
-        python3-wheel \
-        python3-mock \
-        libclang-dev \
         && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
-RUN ln -s /usr/bin/python3 /usr/bin/python
+#RUN ln -s /usr/bin/python3 /usr/bin/python
 
 RUN curl -O https://bootstrap.pypa.io/get-pip.py && \
     python get-pip.py && \
@@ -42,18 +38,13 @@ RUN pip --no-cache-dir install \
         && \
     python -m ipykernel.kernelspec
 
-# --- DO NOT EDIT OR DELETE BETWEEN THE LINES --- #
-# These lines will be edited automatically by parameterized_docker_build.sh. #
-# COPY _PIP_FILE_ /
-# RUN pip --no-cache-dir install /_PIP_FILE_
-# RUN rm -f /_PIP_FILE_
-
-# Install TensorFlow GPU version.
 RUN pip --no-cache-dir install \
-    http://storage.googleapis.com/tensorflow/linux/gpu/tensorflow_gpu-0.0.0-cp35-none-linux_x86_64.whl
-# --- ~ DO NOT EDIT OR DELETE BETWEEN THE LINES --- #
-
-# For CUDA profiling, TensorFlow requires CUPTI.
+        h5py \
+        pandas \
+        tqdm \
+        TFLearn \
+        git+https://github.com/fchollet/keras.git
+#
 ENV CUDA_HOME /usr/local/cuda
 ENV CI_BUILD_PYTHON python
 ENV LD_LIBRARY_PATH /usr/local/cuda/extras/CUPTI/lib64:$LD_LIBRARY_PATH
