@@ -1,6 +1,8 @@
-#FROM nvidia/cuda:8.0-cudnn5-runtime-ubuntu16.04
-FROM gcr.io/tensorflow/tensorflow:latest-gpu-py3
-# Pick up some TF dependencies
+#FROM nvidia/cuda:8.0-cudnn5-devel
+#FROM nvidia/cuda:8.0-cudnn5-runtime
+#FROM tensorflow/tensorflow:latest-devel-gpu-py3
+FROM tensorflow/tensorflow:latest-gpu-py3
+
 RUN apt-get update && apt-get install -y --no-install-recommends \
         build-essential \
         curl \
@@ -10,57 +12,48 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         libpng12-dev \
         libzmq3-dev \
         pkg-config \
+        python3-dev \
         rsync \
         software-properties-common \
         unzip \
         zip \
         zlib1g-dev \
-        python3-dev \
         && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
+    
+RUN ln -s /usr/bin/python3 /usr/bin/python
 
-#RUN ln -s /usr/bin/python3 /usr/bin/python
-
-RUN curl -O https://bootstrap.pypa.io/get-pip.py && \
+RUN curl -fSsL -O https://bootstrap.pypa.io/get-pip.py && \
     python get-pip.py && \
     rm get-pip.py
 
-RUN pip --no-cache-dir install \
-        ipykernel \
-        jupyter \
-        matplotlib \
-        numpy \
-        scipy \
-        sklearn \
-        pandas \
-        Pillow \
-        && \
-    python -m ipykernel.kernelspec
-
-RUN pip --no-cache-dir install \
-        h5py \
-        pandas \
-        tqdm \
-        TFLearn \
-        git+https://github.com/fchollet/keras.git
-#
-ENV CUDA_HOME /usr/local/cuda
+# Configure the build for our CUDA configuration.
 ENV CI_BUILD_PYTHON python
 ENV LD_LIBRARY_PATH /usr/local/cuda/extras/CUPTI/lib64:$LD_LIBRARY_PATH
 ENV TF_NEED_CUDA 1
-ENV TF_CUDA_COMPUTE_CAPABILITIES=3.5,3.7,5.2,6.0,6.1
-#
-ENV TF_NEED_MKL 1
-ENV CC_OPT_FLAGS -march=native
-ENV TF_NEED_GCP 0
-ENV TF_NEED_HDFS 0
-ENV TF_NEED_JEMALLOC 1
-ENV TF_NEED_OPENCL 0
-ENV TF_ENABLE_XLA 0
+
+# Miniconda3 Install
+ADD https://repo.continuum.io/miniconda/Miniconda3-4.2.12-Linux-x86_64.sh tmp/Miniconda3-4.2.12-Linux-x86_64.sh
+RUN bash tmp/Miniconda3-4.2.12-Linux-x86_64.sh -b
+ENV PATH $PATH:/root/miniconda3/bin/
+
+COPY environment-gpu.yml  ./environment.yml
+RUN conda env create -f=environment.yml --name tensorflow --debug -v -v
+
+# cleanup tarballs and downloaded package files
+RUN conda clean -tp -y
 
 # Set up our notebook config.
 COPY jupyter_notebook_config.py /root/.jupyter/
+
+# Term 1 workdir
+RUN mkdir /src
+WORKDIR "/src"
+
+# Make sure CUDNN is detected
+ENV LD_LIBRARY_PATH /usr/local/cuda/lib64/:$LD_LIBRARY_PATH
+RUN ln -s /usr/local/cuda/lib64/libcudnn.so.5 /usr/local/cuda/lib64/libcudnn.so
 
 # TensorBoard
 EXPOSE 6006

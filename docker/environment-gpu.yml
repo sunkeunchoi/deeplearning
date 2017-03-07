@@ -1,4 +1,4 @@
-name: tf
+cname: tensorflow
 channels:
     - https://conda.anaconda.org/menpo
     - conda-forge
