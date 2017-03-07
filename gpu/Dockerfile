@@ -124,7 +124,7 @@ ENV TF_ENABLE_XLA 0
 #ENV HOST_C_COMPILER
 #RUN configure
 #RUN tensorflow/tools/ci_build/builds/configured GPU \
-#    bazel build -c opt --config=cuda tensorflow/tools/pip_package:build_pip_package && \
+#    bazel build -c opt --config=cuda --ignore_unsupported_sandboxing tensorflow/tools/pip_package:build_pip_package && \
 #    bazel-bin/tensorflow/tools/pip_package/build_pip_package /tmp/pip && \
 #    pip --no-cache-dir install --upgrade /tmp/pip/tensorflow-*.whl && \
 #    rm -rf /tmp/pip && \
