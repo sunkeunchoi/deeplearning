@@ -33,16 +33,24 @@ ENV CI_BUILD_PYTHON python
 ENV LD_LIBRARY_PATH /usr/local/cuda/extras/CUPTI/lib64:$LD_LIBRARY_PATH
 ENV TF_NEED_CUDA 1
 
-# Miniconda3 Install
-ADD https://repo.continuum.io/miniconda/Miniconda3-4.2.12-Linux-x86_64.sh tmp/Miniconda3-4.2.12-Linux-x86_64.sh
-RUN bash tmp/Miniconda3-4.2.12-Linux-x86_64.sh -b
-ENV PATH $PATH:/root/miniconda3/bin/
-
-COPY environment-gpu.yml  ./environment.yml
-RUN conda env create -f=environment.yml --name tensorflow --debug -v -v
-
-# cleanup tarballs and downloaded package files
-RUN conda clean -tp -y
+RUN pip --no-cache-dir install --upgrade \
+        ipykernel \
+        jupyter \
+        matplotlib \
+        numpy \
+        scipy \
+        sklearn \
+        pillow \
+        scikit-learn \
+        scikit-image \
+        h5py \
+        pandas \
+        tqdm \
+        tensorflow-gpu \
+        TFLearn \
+        git+https://github.com/fchollet/keras.git \
+        && \
+        python -m ipykernel.kernelspec
 
 # Set up our notebook config.
 COPY jupyter_notebook_config.py /root/.jupyter/
