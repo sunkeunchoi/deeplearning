@@ -1,11 +1,12 @@
 docker-machine create --driver amazonec2 \
-                  --amazonec2-region us-west-2 \
-                  --amazonec2-ami ami-a58d0dc5 \
+                  --amazonec2-region us-east-1 \
+                  --amazonec2-zone c \
+                  --amazonec2-ami ami-f4cc1de2 \
                   --amazonec2-security-group jupyter \
                   --amazonec2-instance-type p2.xlarge \
                   --amazonec2-root-size 12 \
                   --amazonec2-volume-type gp2 \
-                  p2-gpu
+                  gpu
 
 sudo apt-get update && sudo apt full-upgrade -y && \
     sudo apt-get clean && \
