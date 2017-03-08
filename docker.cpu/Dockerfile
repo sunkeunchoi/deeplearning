@@ -2,7 +2,7 @@
 #FROM nvidia/cuda:8.0-cudnn5-runtime
 #FROM tensorflow/tensorflow:latest-devel-gpu-py3
 #FROM tensorflow/tensorflow:latest-gpu-py3
-FROM tensorflow/tensorflow:latest-cpu-py3
+FROM tensorflow/tensorflow:latest-py3
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
         build-essential \
@@ -50,7 +50,7 @@ RUN pip --no-cache-dir install --upgrade \
         h5py \
         pandas \
         tqdm \
-        tensorflow-gpu \
+        tensorflow \
         TFLearn \
         git+https://github.com/fchollet/keras.git \
         && \
